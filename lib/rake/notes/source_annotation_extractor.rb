@@ -21,6 +21,7 @@ module Rake
     # of the line (or closing ERB comment tag) is considered to be their text.
     class SourceAnnotationExtractor
       RUBYFILES = %w( Vagrantfile Rakefile Puppetfile Gemfile )
+      IGNORE_DIRS = [ './bundle', './public', './node_modules' ]
 
       class Annotation < Struct.new(:line, :tag, :text)
 
@@ -75,6 +76,7 @@ module Rake
           next if File.basename(item)[0] == ?.
 
           if File.directory?(item)
+            next if IGNORE_DIRS.include?(item)
             results.update(find_in(item))
           elsif item =~ /\.(builder|rb|coffee|rake|pp|ya?ml|gemspec|feature)$/ || RUBYFILES.include?(File.basename(item))
             results.update(extract_annotations_from(item, /#\s*(#{tag}):?\s*(.*)$/))
